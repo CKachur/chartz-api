@@ -6,6 +6,22 @@ app.use(bodyParser.json())
 
 var mongo = require('../mongo')
 
+function checkDataType(data, dataType) {
+    var t = typeof(data)
+    switch (dataType) {
+        case 'number':
+        case 'time':
+            if (t == 'number') return true
+            break
+        case 'string':
+            if (t == 'string') return true
+            break
+        default:
+            return false
+    }
+    return false
+}
+
 app.get('/dataset', (req, res) => {
     if (req.body == undefined) { return res.send('No body specified') }
     if (req.body.name == undefined) { return res.send('No name specified for dataset') }
@@ -62,18 +78,35 @@ app.put('/dataset', (req, res) => {
     if (!Array.isArray(req.body.data)) { return res.send('\'data\' must be an array') }
     if (!req.body.data.length) { return res.send('No data specified to add to dataset') }
 
-    // Get the structure of the dataset
+    mongo.getDatasetStructure(req.body.name, (err, structure) => {
+        if (err) { return res.send(err) }
+        if (structure == null || !structure.length) { return res.send('Couldn\'t get structure of dataset') }
 
-    // Check that each data object to be added matches the structure
+        var incomingData = req.body.data
+        for (let i = 0; i < incomingData.length; i++) {
+            for (let j = 0; j < structure.length; j++) {
+                var dataPiece = (incomingData[i])[structure[j].dataName]
+                if (dataPiece == undefined) {
+                    return res.send(`Need to specify data attribute \'${structure[j].dataName}\'`)
+                }
+                if (!checkDataType(dataPiece, structure[j].dataType)) {
+                    return res.send(`Data type mismatch for attribute \'${structure[j].dataName}\'`)
+                }
+            }
+        }
 
-    res.send('PUT /dataset')
+        mongo.addDataToDataset(req.body.name, incomingData, (err, addedData) => {
+            if (err) { return res.send(err) }
+            if (!addedData) { return res.send('Could not add data to dataset') }
+            res.send('PUT /dataset successful')
+        })
+    })
 })
 
 app.delete('/dataset', (req, res) => {
     if (req.body == undefined) { return res.send('No body specified') }
     if (req.body.name == undefined) { return res.send('No name specified for dataset') }
 
-    // Delete collection and the document in 'datasets' for the given name
     mongo.deleteDataset(req.body.name, (err, deletedDataset) => {
         if (err) { return res.send(err) }
         if (!deletedDataset) { return res.send('Couldn\'t delete dataset') }

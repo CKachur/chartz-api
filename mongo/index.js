@@ -64,8 +64,20 @@ module.exports.getDatasetStructure = (datasetName, mainCallback) => {
     })
 }
 
-module.exports.addDataToDataset = (datasetName, data) => {
-
+module.exports.addDataToDataset = (datasetName, data, mainCallback) => {
+    async.waterfall([
+        async.apply(connectToMongoCollection, datasetName),
+        (collection, client, callback) => {
+            collection.insert(data, (err, r) => {
+                client.close()
+                if (err) { return callback(err, false) }
+                if (!r.insertedCount) { return callback(null, false) }
+                callback(null, true)
+            })
+        }
+    ], (err, result) => {
+        mainCallback(err, result)
+    })
 }
 
 module.exports.deleteDataset = (datasetName, mainCallback) => {
