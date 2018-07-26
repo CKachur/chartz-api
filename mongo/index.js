@@ -3,6 +3,14 @@ const config = require('../config')
 const async = require('async')
 const mongoOptions = { useNewUrlParser: true }
 
+var connectToMongoDb = (callback) => {
+    MongoClient.connect(config.MONGO_URL, mongoOptions, (err, client) => {
+        if (err) { return callback(err, null, null) }
+        const db = client.db(config.MONGO_DB_NAME)
+        callback(null, db, client)
+    })
+}
+
 var connectToMongoCollection = (collectionName, callback) => {
     MongoClient.connect(config.MONGO_URL, mongoOptions, (err, client) => {
         if (err) { return callback(err, null, null) }
@@ -82,8 +90,18 @@ module.exports.addDataToDataset = (datasetName, data, mainCallback) => {
 
 module.exports.deleteDataset = (datasetName, mainCallback) => {
     async.waterfall([
-        async.apply(connectToMongoCollection, 'datasets'),
-        (collection, client, callback) => {
+        connectToMongoDb,
+        (db, client, callback) => {
+            db.collection(datasetName, { strict: true }, (err, collection) => {
+                if (err) { return callback(null, db, client) }
+                collection.drop((err, r) => {
+                    if (err) { return callback(err, null) }
+                    callback(null, db, client)
+                })
+            })
+        },
+        (db, client, callback) => {
+            const collection = db.collection('datasets')
             var response = collection.findOneAndDelete({ name: datasetName }, (err, r) => {
                 client.close()
                 if (err) { return callback(err, false) }
