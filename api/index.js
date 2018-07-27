@@ -22,6 +22,17 @@ function checkDataType(data, dataType) {
     return false
 }
 
+/*
+ * Gets data from a specified dataset. If only startTime or endTime is
+ * specified, it will look forward one day or backwards one day, respectively.
+ * If Neither are specified it will retrieve data from one day back starting
+ * at the current time
+ *
+ * Query Parameters:
+ * name (required) - Name of the dataset to pull data from
+ * startTime - Data before this time will not be pulled from dataset
+ * endTime - Data after this time will not be pulled from dataset
+ */
 app.get('/dataset', (req, res) => {
     if (req.query.name == undefined) { return res.send('No name specified for dataset') }
 
@@ -55,6 +66,19 @@ app.get('/dataset', (req, res) => {
     })
 })
 
+/*
+ * Creates a dataset, given the name specified is not an already existing
+ * dataset.
+ *
+ * Body Parameters:
+ * name (required) - Name of the dataset to create
+ * structure (required) - Array containing objects specifying what data will
+ *                        be in the dataset. Each one must specify a 'dataName'
+ *                        and 'dataType'. Data names need to be unique in a
+ *                        dataset and cannot be 'timestamp'. Data types must
+ *                        be either 'number' or 'string'. Must specify at
+ *                        least one data point.
+ */
 app.post('/dataset', (req, res) => {
     if (req.body == undefined) { return res.send('No body specified') }
     if (req.body.name == undefined) { return res.send('No name specified for dataset') }
@@ -96,6 +120,17 @@ app.post('/dataset', (req, res) => {
     })
 })
 
+/*
+ * Adds data to a dataset.
+ *
+ * Body Parameters:
+ * name (required) - Name of the dataset to add data to
+ * data (required) - Array of data objects to be added to the dataset. They
+ *                   must supply the fields with correct types specified in the
+ *                   structure of the dataset, besides 'timestamp'. If
+ *                   'timestamp' is not specified it will be set to the current
+ *                   time.
+ */
 app.put('/dataset', (req, res) => {
     if (req.body == undefined) { return res.send('No body specified') }
     if (req.body.name == undefined) { return res.send('No name specified for dataset') }
@@ -132,6 +167,12 @@ app.put('/dataset', (req, res) => {
     })
 })
 
+/*
+ * Deletes a dataset from the database.
+ *
+ * Body Parameters:
+ * name (required) - name of the dataset to delete
+ */
 app.delete('/dataset', (req, res) => {
     if (req.body == undefined) { return res.send('No body specified') }
     if (req.body.name == undefined) { return res.send('No name specified for dataset') }
