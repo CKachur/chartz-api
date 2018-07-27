@@ -48,14 +48,18 @@ app.post('/dataset', (req, res) => {
         if (dataName == undefined || dataType == undefined) {
             return res.send('Objects in \'structure\' must supply a \'dataName\' and \'dataType\' field')
         }
+        if (dataName == 'timestamp') {
+            return res.send('Cannot name data field \'timestamp\'')
+        }
         if (data[dataName] != undefined) {
             return res.send(`Multiple data objects specified for \'${dataName}\'`)
         }
-        if (dataType != 'number' && dataType != 'string' && dataType != 'time') {
-            return res.send('Data types must be one of the following: \'number\', \'string\', \'time\'')
+        if (dataType != 'number' && dataType != 'string') {
+            return res.send('Data types must be one of the following: \'number\', \'string\'')
         }
         data[dataName] = { dataName, dataType }
     }
+    data['timestamp'] = { 'dataName': 'timestamp', 'dataType': 'time' }
     var dataArray = []
     Object.keys(data).map((key) => { dataArray.push(data[key]) })
 
@@ -85,7 +89,11 @@ app.put('/dataset', (req, res) => {
         var incomingData = req.body.data
         for (let i = 0; i < incomingData.length; i++) {
             for (let j = 0; j < structure.length; j++) {
+                if (structure[j].dataName == 'timestamp' && (incomingData[i])['timestamp'] == undefined) {
+                    (incomingData[i])['timestamp'] = Date.now()
+                }
                 var dataPiece = (incomingData[i])[structure[j].dataName]
+
                 if (dataPiece == undefined) {
                     return res.send(`Need to specify data attribute \'${structure[j].dataName}\'`)
                 }
