@@ -1,20 +1,5 @@
 var mongo = require('../../mongo').datasets
-
-function checkDataType(data, dataType) {
-    var t = typeof(data)
-    switch (dataType) {
-        case 'number':
-        case 'time':
-            if (t == 'number') return true
-            break
-        case 'string':
-            if (t == 'string') return true
-            break
-        default:
-            return false
-    }
-    return false
-}
+var apiCheck = require('../apiCheck').dataset
 
 /*
  * Gets data from a specified dataset. If only startTime or endTime is
@@ -147,7 +132,7 @@ module.exports.putDataset = (req, res) => {
                 if (dataPiece == undefined) {
                     return res.send(`Need to specify data attribute \'${structure[j].dataName}\'`)
                 }
-                if (!checkDataType(dataPiece, structure[j].dataType)) {
+                if (!apiCheck.checkDataType(dataPiece, structure[j].dataType)) {
                     return res.send(`Data type mismatch for attribute \'${structure[j].dataName}\'`)
                 }
             }
