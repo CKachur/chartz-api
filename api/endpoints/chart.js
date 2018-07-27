@@ -1,4 +1,4 @@
-var mongo = require('../mongo').charts
+var mongo = require('../../mongo').charts
 
 module.exports.getChart = (req, res) => {
     if (req.query.name == undefined) { return res.send('No name specified for chart') }

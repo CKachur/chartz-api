@@ -4,18 +4,17 @@ const app = express()
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
-var dataset = require('./dataset')
-var chart = require('./chart')
+var endpoints = require('./endpoints')
 
 // Dataset endpoints
-app.get('/dataset', dataset.getDataset)
-app.post('/dataset', dataset.postDataset)
-app.put('/dataset', dataset.putDataset)
-app.delete('/dataset', dataset.deleteDataset)
+app.get('/dataset', endpoints.dataset.getDataset)
+app.post('/dataset', endpoints.dataset.postDataset)
+app.put('/dataset', endpoints.dataset.putDataset)
+app.delete('/dataset', endpoints.dataset.deleteDataset)
 // Chart endpoints
-app.get('/chart', chart.getChart)
-app.post('/chart', chart.postChart)
-app.put('/chart', chart.putChart)
-app.delete('/chart', chart.deleteChart)
+app.get('/chart', endpoints.chart.getChart)
+app.post('/chart', endpoints.chart.postChart)
+app.put('/chart', endpoints.chart.putChart)
+app.delete('/chart', endpoints.chart.deleteChart)
 
 module.exports = app
