@@ -1,4 +1,4 @@
-var mongo = require('../mongo')
+var mongo = require('../mongo').datasets
 
 function checkDataType(data, dataType) {
     var t = typeof(data)
