@@ -23,15 +23,36 @@ function checkDataType(data, dataType) {
 }
 
 app.get('/dataset', (req, res) => {
-    if (req.body == undefined) { return res.send('No body specified') }
-    if (req.body.name == undefined) { return res.send('No name specified for dataset') }
-    // Add options for querying dataset data
+    if (req.query.name == undefined) { return res.send('No name specified for dataset') }
 
-    // Check if dataset exists
+    mongo.checkIfDatasetExists(req.query.name, (err, datasetExists) => {
+        if (err) { return res.send(err) }
+        if (!datasetExists) { return res.send(`\'${req.query.name}\' dataset does not exist`) }
 
-    // Get data for the dataset
+        var startTime
+        var endTime
+        if (req.query.startTime) { startTime = new Date(+req.query.startTime).getTime() }
+        if (req.query.endTime) { endTime = new Date(+req.query.endTime).getTime() }
 
-    res.send('GET /dataset')
+        if (startTime == undefined && endTime == undefined) {
+            endTime = Date.now()
+            startTime = endTime - (1000 * 60 * 60 * 24)
+        } else if (startTime != undefined && endTime == undefined) {
+            endTime = startTime + (1000 * 60 * 60 * 24)
+        } else if (startTime == undefined && endTime != undefined) {
+            startTime = endTime - (1000 * 60 * 60 * 24)
+        }
+
+        var options = { '$and': [
+            { 'timestamp': { '$gte': startTime } },
+            { 'timestamp': { '$lte': endTime } }
+        ]}
+
+        mongo.getDataFromDataset(req.query.name, options, (err, docs) => {
+            if (err) { return res.send(err) }
+            res.json({ data: docs })
+        })
+    })
 })
 
 app.post('/dataset', (req, res) => {

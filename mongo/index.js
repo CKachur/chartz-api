@@ -52,8 +52,19 @@ module.exports.createDataset = (datasetName, structure, mainCallback) => {
     })
 }
 
-module.exports.getDataFromDataset = (datasetName, options) => {
-
+module.exports.getDataFromDataset = (datasetName, options, mainCallback) => {
+    async.waterfall([
+        async.apply(connectToMongoCollection, datasetName),
+        (collection, client, callback) => {
+            collection.find(options).toArray((err, docs) => {
+                client.close()
+                if (err) { return callback(err, null) }
+                callback(null, docs)
+            })
+        }
+    ], (err, result) => {
+        mainCallback(err, result)
+    })
 }
 
 module.exports.getDatasetStructure = (datasetName, mainCallback) => {
