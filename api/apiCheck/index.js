@@ -1,4 +1,4 @@
-var dataset = require('./dataset')
+var dataset = require('./datasetCheck')
 
 module.exports = {
     dataset: dataset
