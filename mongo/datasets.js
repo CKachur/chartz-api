@@ -104,14 +104,23 @@ module.exports.deleteDataset = (datasetName, mainCallback) => {
             db.collection(datasetName, { strict: true }, (err, collection) => {
                 if (err) { return callback(null, db, client) }
                 collection.drop((err, r) => {
-                    if (err) { return callback(err, null) }
+                    if (err) {
+                        client.close()
+                        return callback(err, false)
+                    }
                     callback(null, db, client)
                 })
             })
         },
         (db, client, callback) => {
+            const collection = db.collection('charts')
+            collection.deleteMany({ dataset: datasetName }, (err, result) => {
+                callback(null, db, client)
+            })
+        },
+        (db, client, callback) => {
             const collection = db.collection('datasets')
-            var response = collection.findOneAndDelete({ name: datasetName }, (err, r) => {
+            collection.findOneAndDelete({ name: datasetName }, (err, r) => {
                 client.close()
                 if (err) { return callback(err, false) }
                 if (!r.value) { return callback(null, false) }
