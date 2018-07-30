@@ -29,6 +29,19 @@ module.exports.getChart = (chartName, mainCallback) => {
     ], (err, result) => { mainCallback(err, result) })
 }
 
+module.exports.getCharts = (mainCallback) => {
+    async.waterfall([
+        async.apply(connect.connectToMongoCollection, 'charts'),
+        (collection, client, callback) => {
+            collection.find({}).toArray((err, docs) => {
+                client.close()
+                if (err) { return callback(err, null) }
+                callback(null, docs)
+            })
+        }
+    ], (err, result) => { mainCallback(err, result) })
+}
+
 module.exports.createChart = (chart, mainCallback) => {
     async.waterfall([
         async.apply(connect.connectToMongoCollection, 'charts'),

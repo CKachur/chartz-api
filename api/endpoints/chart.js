@@ -11,6 +11,13 @@ module.exports.getChart = (req, res) => {
     })
 }
 
+module.exports.getCharts = (req, res) => {
+    mongo.charts.getCharts((err, charts) => {
+        if (err) { return res.send(err) }
+        res.json({ charts: charts })
+    })
+}
+
 module.exports.postChart = (req, res) => {
     if (req.body == undefined) { return res.send('No body specified') }
     if (req.body.name == undefined) { return res.send('No name specified for chart') }

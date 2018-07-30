@@ -46,6 +46,16 @@ module.exports.getDataset = (req, res) => {
 }
 
 /*
+ * Gets all dataset names and structures
+ */
+module.exports.getDatasets = (req, res) => {
+    mongo.getDatasets((err, datasets) => {
+        if (err) { return res.send(err) }
+        res.json({ datasets: datasets })
+    })
+}
+
+/*
  * Creates a dataset, given the name specified is not an already existing
  * dataset.
  *
