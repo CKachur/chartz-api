@@ -1,5 +1,5 @@
 var mongo = require('../../mongo')
-var apiCheck = require('../apiCheck').chart
+var apiCheck = require('../apiCheck')
 
 module.exports.getChart = (req, res) => {
     if (req.query.name == undefined) { return res.send('No name specified for chart') }
