@@ -1,5 +1,6 @@
 var mongo = require('../../mongo')
 var apiCheck = require('../apiCheck')
+var async = require('async')
 
 module.exports.getChart = (req, res) => {
     if (req.query.name == undefined) { return res.send('No name specified for chart') }
@@ -24,23 +25,34 @@ module.exports.postChart = (req, res) => {
     if (req.body.type == undefined) { return res.send('No type specified for chart') }
     if (req.body.dataset == undefined) { return res.send('No dataset specified for chart') }
 
-    mongo.charts.checkIfChartExists(req.body.name, (err, chartExists) => {
-        if (err) { return res.send(err) }
-        if (chartExists) { return res.send('Chart already exists') }
-
-        mongo.datasets.getDatasetStructure(req.body.dataset, (err, structure) => {
-            if (err) { return res.send(err) }
-            if (structure == null) { return res.send('Could not find dataset structure') }
-
-            var cleanedChart = apiCheck.chart.checkChart(req.body, structure)
-            if (cleanedChart == null) { return res.send('Invalid chart object') }
-
-            mongo.charts.createChart(cleanedChart, (err, createdChart) => {
-                if (err) { return res.send(err) }
-                if (!createdChart) { return res.send('Couldn\'t create chart') }
-                res.send('POST /chart successful')
+    async.waterfall([
+        (callback) => {
+            mongo.charts.checkIfChartExists(req.body.name, (err, chartExists) => {
+                if (err) { return callback(err) }
+                if (chartExists) { return callback('Chart already exists') }
+                callback(null)
             })
-        })
+        },
+        (callback) => {
+            mongo.datasets.getDatasetStructure(req.body.dataset, (err, structure) => {
+                if (err) { return callback(err) }
+                if (structure == null) { return callback('Could not find dataset structure') }
+
+                var cleanedChart = apiCheck.chart.checkChart(req.body, structure)
+                if (cleanedChart == null) { return callback('Invalid chart object') }
+                callback(null, cleanedChart)
+            })
+        },
+        (cleanedChart, callback) => {
+            mongo.charts.createChart(cleanedChart, (err, createdChart) => {
+                if (err) { return callback(err) }
+                if (!createdChart) { return callback('Could not create chart') }
+                callback(null)
+            })
+        }
+    ], (err) => {
+        if (err) { return res.send(err) }
+        res.send('POST /chart successful')
     })
 }
 
@@ -50,23 +62,34 @@ module.exports.putChart = (req, res) => {
     if (req.body.type == undefined) { return res.send('No type specified for chart') }
     if (req.body.dataset == undefined) { return res.send('No dataset specified for chart') }
 
-    mongo.charts.checkIfChartExists(req.body.name, (err, chartExists) => {
-        if (err) { return res.send(err) }
-        if (!chartExists) { return res.send('Chart does not exist') }
-
-        mongo.datasets.getDatasetStructure(req.body.dataset, (err, structure) => {
-            if (err) { return res.send(err) }
-            if (structure == null) { return res.send('Could not find dataset structure') }
-
-            var cleanedChart = apiCheck.chart.checkChart(req.body, structure)
-            if (cleanedChart == null) { return res.send('Invalid chart object') }
-
-            mongo.charts.updateChart(cleanedChart, (err, updatedChart) => {
-                if (err) { return res.send(err) }
-                if (!updatedChart) { return res.send('Couldn\'t update chart') }
-                res.send('PUT /chart successful')
+    async.waterfall([
+        (callback) => {
+            mongo.charts.checkIfChartExists(req.body.name, (err, chartExists) => {
+                if (err) { return callback(err) }
+                if (!chartExists) { return callback('Chart does not exist') }
+                callback(null)
             })
-        })
+        },
+        (callback) => {
+            mongo.datasets.getDatasetStructure(req.body.dataset, (err, structure) => {
+                if (err) { return callback(err) }
+                if (structure == null) { return callback('Could not find dataset structure') }
+
+                var cleanedChart = apiCheck.chart.checkChart(req.body, structure)
+                if (cleanedChart == null) { return callback('Invalid chart object') }
+                callback(null, cleanedChart)
+            })
+        },
+        (cleanedChart, callback) => {
+            mongo.charts.updateChart(cleanedChart, (err, updatedChart) => {
+                if (err) { return callback(err) }
+                if (!updatedChart) { return callback('Could not update chart') }
+                callback(null)
+            })
+        }
+    ], (err) => {
+        if (err) { return res.send(err) }
+        res.send('PUT /chart successful')
     })
 }
 
