@@ -20,10 +20,10 @@ function checkBarGraph(chart, structure) {
 
         for (let i = 0; i < chart.yAxis.length; i++) {
             var yData = data[chart.yAxis[i].dataName]
-            if (yData == undefined || yData != number) {
+            if (yData == undefined || yData != 'number') {
                 return null
             }
-            if (chart.yAxis[i].aggregateBy != 'sum' || chart.yAxis[i].aggregateBy != 'count') {
+            if (chart.yAxis[i].aggregateBy != 'sum' && chart.yAxis[i].aggregateBy != 'count') {
                 return null
             }
             yAxisClean.push({ dataName: chart.yAxis[i].dataName, aggregateBy: chart.yAxis[i].aggregateBy })
@@ -45,7 +45,7 @@ function checkBarGraph(chart, structure) {
 
         for (let i = 0; i < chart.yAxis.length; i++) {
             var yData = data[chart.yAxis[i].dataName]
-            if (yData == undefined || yData != number) {
+            if (yData == undefined || yData != 'number') {
                 return null
             }
             yAxisClean.push({ dataName: chart.yAxis[i].dataName })
