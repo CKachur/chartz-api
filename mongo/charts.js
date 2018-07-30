@@ -60,7 +60,7 @@ module.exports.updateChart = (chart, mainCallback) => {
     async.waterfall([
         async.apply(connect.connectToMongoCollection, 'charts'),
         (collection, client, callback) => {
-            collection.updateOne({ name: chart.name }, chart, (err, result) => {
+            collection.updateOne({ name: chart.name }, { "$set": chart }, (err, result) => {
                 if (err) { return callback(err, false) }
                 if (!result.modifiedCount) { return callback(null, false) }
                 callback(null, true)
