@@ -39,7 +39,7 @@ module.exports.postChart = (req, res) => {
                 if (structure == null) { return callback('Could not find dataset structure') }
 
                 var cleanedChart = apiCheck.chart.checkChart(req.body, structure)
-                if (cleanedChart == null) { return callback('Invalid chart object') }
+                if (typeof(cleanedChart) == 'string') { return callback(cleanedChart) }
                 callback(null, cleanedChart)
             })
         },
@@ -76,7 +76,7 @@ module.exports.putChart = (req, res) => {
                 if (structure == null) { return callback('Could not find dataset structure') }
 
                 var cleanedChart = apiCheck.chart.checkChart(req.body, structure)
-                if (cleanedChart == null) { return callback('Invalid chart object') }
+                if (typeof(cleanedChart) == 'string') { return callback(cleanedChart) }
                 callback(null, cleanedChart)
             })
         },

@@ -1,12 +1,11 @@
 var mongo = require('../../mongo').datasets
 
 function checkBarGraph(chart, structure) {
-    if (chart.xAxis == undefined || chart.xAxis.dataName == undefined) {
-        return null
-    }
-    if (chart.yAxis == undefined || !Array.isArray(chart.yAxis) || !chart.yAxis.length) {
-        return null
-    }
+    if (chart.xAxis == undefined) { return 'xAxis not defined' }
+    if (chart.xAxis.dataName == undefined) { return 'xAxis dataName not defined' }
+    if (chart.yAxis == undefined) { return 'yAxis not defined' }
+    if (!Array.isArray(chart.yAxis)) { return 'yAxis must be an array' }
+    if (!chart.yAxis.length) { return 'No data specified for yAxis' }
 
     var data = {}
     for (let i = 0; i < structure.length; i++) {
@@ -19,24 +18,26 @@ function checkBarGraph(chart, structure) {
         xAxisClean['dataName'] = chart.xAxis.dataName
 
         for (let i = 0; i < chart.yAxis.length; i++) {
-            var yData = data[chart.yAxis[i].dataName]
-            if (yData == undefined || yData != 'number') {
-                return null
-            }
+            if (data[chart.yAxis[i].dataName] == undefined) { return 'yAxis value does not exist in dataset' }
+            if (data[chart.yAxis[i].dataName] != 'number') { return 'yAxis data must be of type number' }
             if (chart.yAxis[i].aggregateBy != 'sum' && chart.yAxis[i].aggregateBy != 'count') {
-                return null
+                return 'yAxis aggregateBy value must be one of the following: \'count\', \'sum\''
             }
             yAxisClean.push({ dataName: chart.yAxis[i].dataName, aggregateBy: chart.yAxis[i].aggregateBy })
         }
     } else if (data[chart.xAxis.dataName] == 'number') {
-        if (chart.xAxis.buckets == undefined || !Array.isArray(chart.xAxis.buckets) || !chart.xAxis.buckets.length) {
-            return null
-        }
+        if (chart.xAxis.buckets == undefined) { return 'xAxis buckets value not defined' }
+        if (!Array.isArray(chart.xAxis.buckets)) { return 'xAxis buckets value must be an array' }
+        if (!chart.xAxis.buckets.length) { return 'No buckets specified for xAxis' }
+
         var bucketsClean = []
         for (let i = 0; i < chart.xAxis.buckets.length; i++) {
             var bucket = chart.xAxis.buckets[i]
-            if (bucket.bottomBound == undefined || bucket.topBound == undefined || isNaN(bucket.bottomBound) || isNaN(bucket.topBound)) {
-                return null
+            if (bucket.bottomBound == undefined || bucket.topBound == undefined) {
+                return 'bottomBound and topBound not specified for buckets'
+            }
+            if (isNaN(bucket.bottomBound) || isNaN(bucket.topBound)) {
+                return 'bottomBound and topBound must be numbers'
             }
             bucketsClean.push({ bottomBound: bucket.bottomBound, topBound: bucket.topBound })
         }
@@ -44,14 +45,12 @@ function checkBarGraph(chart, structure) {
         xAxisClean['buckets'] = bucketsClean
 
         for (let i = 0; i < chart.yAxis.length; i++) {
-            var yData = data[chart.yAxis[i].dataName]
-            if (yData == undefined || yData != 'number') {
-                return null
-            }
+            if (data[chart.yAxis[i].dataName] == undefined) { return 'yAxis value does not exist in dataset' }
+            if (data[chart.yAxis[i].dataName] != 'number') { return 'yAxis data must be of type \'number\'' }
             yAxisClean.push({ dataName: chart.yAxis[i].dataName })
         }
     } else {
-        return null
+        return 'Invalid data type for xAxis'
     }
 
     var cleanedChart = {
@@ -66,25 +65,22 @@ function checkBarGraph(chart, structure) {
 }
 
 function checkLineGraph(chart, structure) {
-    if (chart.xAxis == undefined || typeof(chart.xAxis) != 'string') {
-        return null
-    }
-    if (chart.yAxis == undefined || !Array.isArray(chart.yAxis) || !chart.yAxis.length) {
-        return null
-    }
+    if (chart.xAxis == undefined) { return 'xAxis not defined' }
+    if (typeof(chart.xAxis) != 'string') { return 'xAxis must be a dataset data name' }
+    if (chart.yAxis == undefined) { return 'yAxis not defined' }
+    if (!Array.isArray(chart.yAxis)) { return 'yAxis must be an array' }
+    if (!chart.yAxis.length) { return 'No data specified for yAxis' }
 
     var data = {}
     for (let i = 0; i < structure.length; i++) {
         data[structure[i].dataName] = structure[i].dataType
     }
 
-    if (data[chart.xAxis] == undefined || data[chart.xAxis] != 'number') {
-        return null
-    }
+    if (data[chart.xAxis] == undefined) { return 'xAxis value does not exist in dataset' }
+    if (data[chart.xAxis] != 'number') { return 'xAxis data must be of type \'number\'' }
     for (let i = 0; i < chart.yAxis.length; i++) {
-        if (data[chart.yAxis[i]] == undefined || data[chart.yAxis[i]] != 'number') {
-            return null
-        }
+        if (data[chart.yAxis[i]] == undefined) { return 'yAxis value does not exist in dataset' }
+        if (data[chart.yAxis[i]] != 'number') { return 'yAxis data must be of type \'number\'' }
     }
 
     var cleanedChart = {
@@ -99,9 +95,9 @@ function checkLineGraph(chart, structure) {
 }
 
 function checkLineGraphTime(chart, structure) {
-    if (chart.yAxis == undefined || !Array.isArray(chart.yAxis) || !chart.yAxis.length) {
-        return null
-    }
+    if (chart.yAxis == undefined) { return 'yAxis not defined' }
+    if (!Array.isArray(chart.yAxis)) { return 'yAxis must be an array' }
+    if (!chart.yAxis.length) { return 'No data specified for yAxis' }
 
     var data = {}
     for (let i = 0; i < structure.length; i++) {
@@ -109,8 +105,8 @@ function checkLineGraphTime(chart, structure) {
     }
 
     for (let i = 0; i < chart.yAxis.length; i++) {
-        if (data[chart.yAxis[i]] == undefined) { return null }
-        if (data[chart.yAxis[i]] != 'number') { return null }
+        if (data[chart.yAxis[i]] == undefined) { return 'yAxis value does not exist in dataset' }
+        if (data[chart.yAxis[i]] != 'number') { return 'yAxis values must be of type \'number\'' }
     }
 
     var cleanedChart = {
@@ -132,6 +128,6 @@ module.exports.checkChart = (chart, structure) => {
         case 'lineGraphTime':
             return checkLineGraphTime(chart, structure)
         default:
-            return null
+            return 'Chart type must be one of the following: \'barGraph\', \'lineGraph\', \'lineGraphTime\''
     }
 }
