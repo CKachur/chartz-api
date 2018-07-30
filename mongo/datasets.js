@@ -39,9 +39,7 @@ module.exports.getDatasets = (mainCallback) => {
         (collection, client, callback) => {
             collection.find({}).toArray((err, docs) => {
                 client.close()
-                console.log(err)
                 if (err) { return callback(err, null) }
-                console.log(docs)
                 callback(null, docs)
             })
         }
